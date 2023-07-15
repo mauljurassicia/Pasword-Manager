@@ -1,0 +1,14 @@
+{
+  "targets": {
+    "password-manager-d40dd": {
+      "hosting": {
+        "password-manager": [
+          "password-manager-d40dd"
+        ]
+      }
+    }
+  },
+  "projects": {
+    "default": "password-manager-d40dd"
+  }
+}
