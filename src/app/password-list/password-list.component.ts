@@ -25,6 +25,8 @@ export class PasswordListComponent {
       this.siteUrl = val.siteUrl;
       this.siteUrlImg = val.siteImgUrl
     });
+
+    this.loadPasswords();
   }
   passwordViewToggle(){
     this.showPassword = !this.showPassword;
