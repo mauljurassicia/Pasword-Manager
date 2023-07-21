@@ -3,6 +3,8 @@ import { ActivatedRoute } from '@angular/router';
 import { PasswordManagerService } from '../password-manager.service';
 import { Observable } from 'rxjs';
 
+import { AES, enc } from 'crypto-js';
+
 @Component({
   selector: 'app-password-list',
   templateUrl: './password-list.component.html',
@@ -15,6 +17,25 @@ export class PasswordListComponent {
   siteUrl !: string;
   siteUrlImg !: string;
   siteId !: string;
+
+
+  /*Account information*/
+  accountEmail !: string;
+  accountUsername !: string;
+  accountPassword !: string;
+  accountId !: string;
+
+  /*switch edit and add*/
+  formState : string = "Add New";
+
+  switchToAddUser(){
+    this.formState = "Add New";
+
+    this.accountEmail = '';
+    this.accountUsername = '';
+    this.accountPassword = '';
+    this.accountId = '';
+  }
 
   passwordList !: Observable<Array<any>>;
 
@@ -33,12 +54,42 @@ export class PasswordListComponent {
   }
 
   onSubmit(values: object){
-    this.passwordManagerService.addPassword(values, this.siteId)
-    .then(() => { console.log("password is saved ")})
-    .catch(() => { console.log("goblok lo")});
+    if(this.formState == "Add New"){
+      this.passwordManagerService.addPassword(values, this.siteId)
+      .then(() =>{ })
+      .catch((err) => { console.log(err)});
+    }
+    else if(this.formState == "Edit"){
+      this.passwordManagerService.updatePassword(values, this.siteId, this.accountId)
+      .then(() => { this.switchToAddUser()})
+      .catch(err => { console.log(err)});
+    }
   }
 
   loadPasswords(){
     this.passwordList = this.passwordManagerService.loadPasswords(this.siteId)
+  }
+
+  editPassword(email: string, username: string, password: string, passwordId: string){
+    this.accountId = passwordId;
+    this.accountEmail = email;
+    this.accountUsername = username;
+    this.accountPassword = password;
+
+    this.formState = "Edit";
+  }
+
+  deletePassword(accountId: string){
+    this.passwordManagerService.daletePassword(this.siteId, accountId)
+  }
+
+  encryptPassword(password: string){
+    const secretKey = "Xa5SDO6ujy";
+    return AES.encrypt(password, secretKey).toString();
+  }
+
+  decryptPassword(password: string){
+    const secretKey = "Xa5SDO6ujy";
+    return AES.decrypt(password, secretKey).toString(enc.Utf8);
   }
 }

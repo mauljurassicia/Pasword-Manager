@@ -41,5 +41,15 @@ export class PasswordManagerService {
     return collectionData(dbInstance, {idField: 'id'});
   }
 
+  updatePassword(data: object, siteId: string, accountId: string){
+    const docInstance = doc(this.firestore, 'sites', siteId, 'passwords', accountId );
+    return updateDoc(docInstance, data);
+  }
+
+  daletePassword(siteId: string, accountId: string){
+    const docInstance = doc(this.firestore, 'sites', siteId, 'passwords', accountId);
+    return deleteDoc(docInstance);
+  }
+
 
 }
