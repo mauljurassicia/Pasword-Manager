@@ -1,7 +1,8 @@
 import { Component } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { PasswordManagerService } from '../password-manager.service';
-import { Observable } from 'rxjs';
+import { map } from 'rxjs';
+import { Clipboard } from '@angular/cdk/clipboard';
 
 import { AES, enc } from 'crypto-js';
 
@@ -28,6 +29,9 @@ export class PasswordListComponent {
   /*switch edit and add*/
   formState : string = "Add New";
 
+  /*toggle between encrypt and decrypt*/
+
+
   switchToAddUser(){
     this.formState = "Add New";
 
@@ -37,9 +41,11 @@ export class PasswordListComponent {
     this.accountId = '';
   }
 
-  passwordList !: Observable<Array<any>>;
+  passwordList !: Array<any>;
 
-  constructor(private route: ActivatedRoute, private passwordManagerService: PasswordManagerService){
+  constructor(private route: ActivatedRoute, 
+    private passwordManagerService: PasswordManagerService,
+    private clipboard: Clipboard){
     this.route.queryParams.subscribe((val: any) => {
       this.siteId = val.id;
       this.siteName = val.siteName;
@@ -53,7 +59,9 @@ export class PasswordListComponent {
     this.showPassword = !this.showPassword;
   }
 
-  onSubmit(values: object){
+  onSubmit(values: any){
+
+    values.password = this.encryptPassword(values.password);
     if(this.formState == "Add New"){
       this.passwordManagerService.addPassword(values, this.siteId)
       .then(() =>{ })
@@ -67,14 +75,21 @@ export class PasswordListComponent {
   }
 
   loadPasswords(){
-    this.passwordList = this.passwordManagerService.loadPasswords(this.siteId)
+    this.passwordManagerService.loadPasswords(this.siteId)
+    .pipe(map(items=>{
+      return items.map(item => ({...item, 
+        toggleonDecrypt : true, passwordDecryptedtemp : "" }))
+    })).subscribe(val =>
+      {this.passwordList = val;})
   }
 
-  editPassword(email: string, username: string, password: string, passwordId: string){
-    this.accountId = passwordId;
-    this.accountEmail = email;
-    this.accountUsername = username;
-    this.accountPassword = password;
+  editPassword(password: any){
+
+
+    this.accountId = password.id;
+    this.accountEmail = password.email;
+    this.accountUsername = password.username;
+    this.accountPassword = password.toggleonDecrypt ? password.passwordDecryptedtemp : password.password;
 
     this.formState = "Edit";
   }
@@ -92,4 +107,22 @@ export class PasswordListComponent {
     const secretKey = "Xa5SDO6ujy";
     return AES.decrypt(password, secretKey).toString(enc.Utf8);
   }
+
+  onDecrypt(password: any){
+    if(password.toggleonDecrypt){
+      password.passwordDecryptedtemp = password.password;
+      password.password = this.decryptPassword(password.password);
+      password.toggleonDecrypt = false;
+      this.clipboard.copy(password.password);
+    }
+    else{
+      password.password = password.passwordDecryptedtemp;
+      password.passwordDecryptedtemp = this.decryptPassword(password.password)
+      password.toggleonDecrypt = true;
+    }
+    
+  }
+
+  
+
 }
