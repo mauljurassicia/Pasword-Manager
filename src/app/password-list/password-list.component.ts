@@ -41,6 +41,8 @@ export class PasswordListComponent {
     this.accountId = '';
   }
 
+ 
+
   passwordList !: Array<any>;
 
   constructor(private route: ActivatedRoute, 
