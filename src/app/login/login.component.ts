@@ -1,7 +1,8 @@
-import { Component, HostListener } from '@angular/core';
+import { Component, OnChanges, SimpleChanges, ViewChild } from '@angular/core';
 import { PasswordManagerService } from '../password-manager.service';
 import { MD5 } from 'crypto-js';
 import { Router } from '@angular/router';
+import { FormGroup } from '@angular/forms';
 
 @Component({
   selector: 'app-login',
@@ -11,6 +12,8 @@ import { Router } from '@angular/router';
 export class LoginComponent {
 
   onsignup : boolean = this.router.url == '/signup';
+
+  user : any = {};
 
   constructor(private passwordManagerService: PasswordManagerService, 
     private router: Router){}
@@ -29,6 +32,7 @@ export class LoginComponent {
       this.passwordManagerService.createNewUser(value.email, value.password)
       .then(()=>{
         this.router.navigate(['']);
+        this.passwordManagerService.createNewUserDoc(value.email);
       })
       .catch(() => {this.onSignUp();
       console.log('sign up failed')})
@@ -39,9 +43,5 @@ export class LoginComponent {
   onSignUp(){
     this.router.navigate(['/signup']);
   }
-
-
-  
-
 
 }

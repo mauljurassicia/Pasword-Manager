@@ -10,7 +10,6 @@ export const pageGuardGuard: CanActivateFn =
   if(localStorage.getItem('passwordkey')){
     return true;
   }
-
   return router.parseUrl('');
   
 };

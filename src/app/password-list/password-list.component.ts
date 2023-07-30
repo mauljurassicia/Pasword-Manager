@@ -3,6 +3,7 @@ import { ActivatedRoute } from '@angular/router';
 import { PasswordManagerService } from '../password-manager.service';
 import { map } from 'rxjs';
 import { Clipboard } from '@angular/cdk/clipboard';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 
 import { AES, enc } from 'crypto-js';
 
@@ -12,6 +13,8 @@ import { AES, enc } from 'crypto-js';
   styleUrls: ['./password-list.component.css']
 })
 export class PasswordListComponent {
+
+  siteForm: FormGroup;
 
   showPassword: boolean = false;
   siteName !: string;
@@ -47,7 +50,7 @@ export class PasswordListComponent {
 
   constructor(private route: ActivatedRoute, 
     private passwordManagerService: PasswordManagerService,
-    private clipboard: Clipboard){
+    private clipboard: Clipboard, private formBuilder: FormBuilder){
     this.route.queryParams.subscribe((val: any) => {
       this.siteId = val.id;
       this.siteName = val.siteName;
@@ -56,7 +59,26 @@ export class PasswordListComponent {
     });
 
     this.loadPasswords();
+
+    this.siteForm = this.formBuilder.group({
+      email: ['', [Validators.required, Validators.email]],
+      username: ['', [Validators.required, Validators.minLength(6)]],
+      password: ['', [Validators.required, Validators.minLength(8)]],
+    });
   }
+
+  get email() {
+    return this.siteForm.get('email');
+  }
+
+  get username() {
+    return this.siteForm.get('username');
+  }
+
+  get password() {
+    return this.siteForm.get('password');
+  }
+
   passwordViewToggle(){
     this.showPassword = !this.showPassword;
   }
